@@ -1,99 +1,47 @@
+# streamlit_app.py
+
 import streamlit as st
-import feedparser
-import datetime
-import time
 import json
-import os
+import datetime
+import requests
 
-@st.cache_data(ttl=600)  # Cache for 10 minutes
-def fetch_feed(url):
-    return feedparser.parse(url)
+def load_json_data_from_github(repo, file_path):
+    url = f"https://raw.githubusercontent.com/{repo}/main/{file_path}"
+    response = requests.get(url)
+    if response.status_code == 200:
+        return json.loads(response.text)
+    else:
+        st.error(f"Failed to load data from GitHub. Status code: {response.status_code}")
+        return None
 
-def parse_pubdate(pubdate_str):
-    try:
-        return datetime.datetime.strptime(pubdate_str, "%a, %d %b %Y %H:%M:%S %Z")
-    except ValueError:
-        return datetime.datetime.now()
-
-def load_data(filename):
-    if os.path.exists(filename):
-        with open(filename, 'r') as f:
-            return json.load(f)
-    return {}
-
-def save_data(data, filename):
-    with open(filename, 'w') as f:
-        json.dump(data, f)
-
-def update_feed_data(feed, existing_data):
-    feed_data = existing_data.get(feed.feed.title, [])
-    new_entries = []
-    for entry in feed.entries:
-        entry_data = {
-            'title': entry.title,
-            'published': entry.published,
-            'summary': entry.summary,
-            'link': entry.link
-        }
-        if entry_data not in feed_data:
-            new_entries.append(entry_data)
-    feed_data = new_entries + feed_data  # 新條目加到前面
-    return feed_data
-
-def display_feed(feed_data, limit=15):
-    for entry in feed_data[:limit]:
+def display_feed(feed_data):
+    st.header(feed_data['feed_title'])
+    st.write(f"Last updated: {feed_data['feed_updated']}")
+    
+    for entry in feed_data['entries']:
         st.subheader(entry['title'])
-        st.write(f"Published: {parse_pubdate(entry['published']).strftime('%Y-%m-%d %H:%M:%S')}")
+        st.write(f"Published: {entry['published']}")
         st.write(entry['summary'])
         st.markdown(f"[Read more]({entry['link']})")
         st.markdown("---")
 
 def main():
-    st.title("PubMed Multi-Source RSS Reader with History")
+    st.title("PubMed RSS Reader")
 
-    rss_sources = {
-        "Ear Hear": "https://pubmed.ncbi.nlm.nih.gov/rss/journals/8005585/?limit=15&name=Ear%20Hear&utm_campaign=journals",
-        "Hear Res": "https://pubmed.ncbi.nlm.nih.gov/rss/journals/7900445/?limit=15&name=Hear%20Res&utm_campaign=journals"
-    }
+    github_repo = "xxcyl/rss-feed-processor"
+    file_path = "rss_data.json"
 
-    data_file = 'rss_history.json'
-    feed_data = load_data(data_file)
+    data = load_json_data_from_github(github_repo, file_path)
+    if data is None:
+        return
 
-    if 'last_refresh' not in st.session_state:
-        st.session_state.last_refresh = time.time()
+    tabs = st.tabs(list(data.keys()))
 
-    refresh = st.button("Refresh RSS Feeds")
-
-    if refresh:
-        st.session_state.last_refresh = time.time()
-        for source_name, rss_url in rss_sources.items():
-            feed = fetch_feed(rss_url)
-            feed_data[source_name] = update_feed_data(feed, feed_data)
-        save_data(feed_data, data_file)
-        st.experimental_rerun()
-
-    st.write(f"Last refreshed: {datetime.datetime.fromtimestamp(st.session_state.last_refresh).strftime('%Y-%m-%d %H:%M:%S')}")
-
-    tabs = st.tabs(list(rss_sources.keys()))
-
-    for tab, source_name in zip(tabs, rss_sources.keys()):
+    for tab, (source_name, feed_data) in zip(tabs, data.items()):
         with tab:
-            st.header(source_name)
-            if source_name in feed_data:
-                display_feed(feed_data[source_name])
-            else:
-                st.write("No data available. Please refresh.")
+            display_feed(feed_data)
 
-    # 顯示歷史數據的選項
-    st.sidebar.header("Historical Data")
-    selected_source = st.sidebar.selectbox("Select Source", list(rss_sources.keys()))
-    num_entries = st.sidebar.slider("Number of entries to show", 1, 100, 15)
-
-    if selected_source in feed_data:
-        st.sidebar.subheader(f"Showing {num_entries} entries from {selected_source}")
-        display_feed(feed_data[selected_source], num_entries)
-    else:
-        st.sidebar.write("No historical data available for this source.")
+    st.sidebar.write(f"Data last processed: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
 if __name__ == "__main__":
     main()
