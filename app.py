@@ -1,5 +1,3 @@
-# streamlit_app.py
-
 import streamlit as st
 import json
 import datetime
@@ -21,7 +19,11 @@ def display_feed(feed_data):
     for entry in feed_data['entries']:
         st.subheader(entry['title'])
         st.write(f"Published: {entry['published']}")
-        st.write(entry['summary'])
+        
+        # 添加一個展開/收起的部分來顯示完整內容
+        with st.expander("Show full content"):
+            st.markdown(entry['full_content'])
+        
         st.markdown(f"[Read more]({entry['link']})")
         st.markdown("---")
 
@@ -35,11 +37,17 @@ def main():
     if data is None:
         return
 
-    tabs = st.tabs(list(data.keys()))
+    # 創建側邊欄選擇器
+    selected_feed = st.sidebar.selectbox(
+        "Choose a RSS feed",
+        options=list(data.keys())
+    )
 
-    for tab, (source_name, feed_data) in zip(tabs, data.items()):
-        with tab:
-            display_feed(feed_data)
+    # 顯示選定的 feed
+    if selected_feed in data:
+        display_feed(data[selected_feed])
+    else:
+        st.write("Please select a feed from the sidebar.")
 
     st.sidebar.write(f"Data last processed: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
