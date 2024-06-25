@@ -17,29 +17,27 @@ def display_feed(feed_data):
     st.write(f"Last updated: {feed_data['feed_updated']}")
     
     for entry in feed_data['entries']:
-        st.subheader(entry['title'])
+        st.subheader(f"{entry['title']} - {entry['title_translated']}")
         st.write(f"Published: {entry['published']}")
         
         # 添加一個展開/收起的部分來顯示完整內容
-        with st.expander("Show full content"):
-            st.markdown(entry['full_content'])
+        with st.expander("顯示全文翻譯"):
+            st.markdown(entry['full_content_translated'])
         
-        st.markdown(f"[Read more]({entry['link']})")
+        st.markdown(f"[閱讀原文]({entry['link']})")
         st.markdown("---")
 
 def main():
-    st.title("PubMed RSS Reader")
-
+    st.title("PubMed RSS 閱讀器")
     github_repo = "xxcyl/rss-feed-processor"
-    file_path = "rss_data.json"
-
+    file_path = "rss_data_bilingual.json"
     data = load_json_data_from_github(github_repo, file_path)
     if data is None:
         return
 
     # 創建側邊欄選擇器
     selected_feed = st.sidebar.selectbox(
-        "Choose a RSS feed",
+        "選擇 RSS feed",
         options=list(data.keys())
     )
 
@@ -47,9 +45,9 @@ def main():
     if selected_feed in data:
         display_feed(data[selected_feed])
     else:
-        st.write("Please select a feed from the sidebar.")
+        st.write("請從側邊欄選擇一個 feed。")
 
-    st.sidebar.write(f"Data last processed: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    st.sidebar.write(f"數據最後處理時間: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
 if __name__ == "__main__":
     main()
