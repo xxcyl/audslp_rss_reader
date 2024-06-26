@@ -60,8 +60,6 @@ def display_entries(data, items_per_page=10):
     end_idx = min(start_idx + items_per_page, total_entries)
     
     if total_entries > 0:
-        st.write(f"顯示第 {start_idx + 1} 到 {end_idx} 篇文章")
-    
         # 顯示當前頁的文章
         for entry, feed_name in all_entries[start_idx:end_idx]:
             with st.expander(f"**{entry['title']}**\n*{entry['title_translated']}* (來自: {feed_name})"):
@@ -84,7 +82,6 @@ def display_entries(data, items_per_page=10):
 
 def main():
     st.set_page_config(page_title="聽力期刊速報", page_icon="📚", layout="wide")
-    st.title("📚 聽力期刊速報")
 
     # 初始化 session_state
     if 'current_page' not in st.session_state:
@@ -103,7 +100,10 @@ def main():
     
     # 側邊欄：篩選器
     with st.sidebar:
-        # 搜索框移到最上方，添加 emoji
+        # 將標題移到側邊欄最上方
+        st.title("📚 聽力期刊速報")
+        
+        # 搜索框
         search_term = st.text_input("🔍 搜索文章 (標題或摘要)", "")
         
         # 將期刊名稱按字母順序排序
@@ -128,7 +128,7 @@ def main():
         total_feeds = len(filtered_data)
         total_articles = sum(len(feed_data['entries']) for feed_data in filtered_data.values())
         
-        # 在側邊欄搜索框下方顯示文章統計信息，添加 emoji
+        # 在側邊欄搜索框下方顯示文章統計信息
         with st.sidebar:
             st.write(f"📊 顯示 {total_feeds} 個期刊中的 {total_articles} 篇文章")
             st.write("---")  # 分隔線
