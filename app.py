@@ -17,20 +17,16 @@ def display_feed(feed_data):
     st.write(f"Last updated: {feed_data['feed_updated']}")
     
     for entry in feed_data['entries']:
-        # 使用 markdown 來顯示標題，可以控制字體大小
-        st.markdown(f"### {entry['title']}")
-        st.markdown(f"*{entry['title_translated']}*")
+        # 使用標題和翻譯標題作為展開器的標題
+        with st.expander(f"**{entry['title']}**\n*{entry['title_translated']}*"):
+            st.write(f"Published: {entry['published']}")
+            
+            # 顯示 TL;DR 摘要
+            st.markdown(entry['tldr'])
+            
+            # 顯示原文鏈接
+            st.markdown(f"[閱讀原文]({entry['link']})")
         
-        st.write(f"Published: {entry['published']}")
-        
-        # 顯示 TL;DR 摘要
-        st.markdown(entry['tldr'])
-        
-        # 添加一個展開/收起的部分來顯示原文內容
-        with st.expander("顯示原文"):
-            st.markdown(entry['full_content'])
-        
-        st.markdown(f"[閱讀原文]({entry['link']})")
         st.markdown("---")
 
 def main():
