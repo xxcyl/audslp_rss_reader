@@ -17,7 +17,10 @@ def display_feed(feed_data):
     st.write(f"Last updated: {feed_data['feed_updated']}")
     
     for entry in feed_data['entries']:
-        st.subheader(f"{entry['title']} - {entry['title_translated']}")
+        # 使用 markdown 來顯示標題，可以控制字體大小
+        st.markdown(f"### {entry['title']}")
+        st.markdown(f"*{entry['title_translated']}*")
+        
         st.write(f"Published: {entry['published']}")
         
         # 顯示 TL;DR 摘要
