@@ -44,8 +44,8 @@ def search_entries(data, search_term, selected_feeds):
 def display_entries(data, items_per_page=10):
     """顯示所有選中 feed 的條目，帶分頁功能"""
     all_entries = []
-    for feed_data in data.values():
-        all_entries.extend([(entry, feed_data['feed_title']) for entry in feed_data['entries']])
+    for feed_name, feed_data in data.items():
+        all_entries.extend([(entry, feed_name) for entry in feed_data['entries']])
     
     all_entries.sort(key=lambda x: x[0]['published'], reverse=True)
     
@@ -65,8 +65,8 @@ def display_entries(data, items_per_page=10):
     st.write(f"顯示第 {start_idx + 1} 到 {end_idx} 篇文章")
     
     # 顯示當前頁的文章
-    for entry, feed_title in all_entries[start_idx:end_idx]:
-        with st.expander(f"**{entry['title']}**\n*{entry['title_translated']}* (來自: {feed_title})"):
+    for entry, feed_name in all_entries[start_idx:end_idx]:
+        with st.expander(f"**{entry['title']}**\n*{entry['title_translated']}* (來自: {feed_name})"):
             st.write(f"Published: {entry['published']}")
             st.markdown(entry['tldr'])
             st.markdown(f"[PubMed]({entry['link']})")
