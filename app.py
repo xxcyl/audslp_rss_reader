@@ -21,8 +21,11 @@ def display_feed(feed_data, feed_name, items_per_page=10):
     total_entries = len(feed_data['entries'])
     total_pages = max(1, math.ceil(total_entries / items_per_page))
     
-    # 使用 number_input 進行分頁
-    page = st.number_input(f"頁碼 (共 {total_pages} 頁)", min_value=1, max_value=total_pages, value=1, step=1, key=f"{feed_name}_page")
+    # 使用 session_state 來保存頁碼狀態
+    if f"{feed_name}_page" not in st.session_state:
+        st.session_state[f"{feed_name}_page"] = 1
+    
+    page = st.session_state[f"{feed_name}_page"]
     
     start_idx = (page - 1) * items_per_page
     end_idx = min(start_idx + items_per_page, total_entries)
@@ -32,9 +35,15 @@ def display_feed(feed_data, feed_name, items_per_page=10):
             st.write(f"Published: {entry['published']}")
             st.markdown(entry['tldr'])
             st.markdown(f"[PubMed]({entry['link']})")
+    
+    # 在底部添加分頁控制
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        page = st.number_input(f"頁碼 (共 {total_pages} 頁)", min_value=1, max_value=total_pages, value=page, step=1, key=f"{feed_name}_page_input")
+        st.session_state[f"{feed_name}_page"] = page
 
 def main():
-    st.set_page_config(page_title="PubMed RSS 閱讀器", page_icon="📚", layout="wide")
+    st.set_page_config(page_title="PubMed RSS 閱讀器", page_icon="📚")
     st.title("PubMed RSS 閱讀器")
 
     github_repo = "xxcyl/rss-feed-processor"
@@ -53,7 +62,8 @@ def main():
             st.header(feed_name)
             display_feed(feed_data, feed_name)
     
-    st.sidebar.write(f"數據最後處理時間: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    # 在頁面底部顯示數據最後處理時間
+    st.write(f"數據最後處理時間: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
 if __name__ == "__main__":
     main()
