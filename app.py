@@ -34,7 +34,7 @@ def display_feed(feed_data, feed_name, items_per_page=10):
             st.markdown(f"[PubMed]({entry['link']})")
 
 def main():
-    st.set_page_config(page_title="PubMed RSS 閱讀器", page_icon="📚", layout="wide")
+    st.set_page_config(page_title="PubMed RSS 閱讀器", page_icon="📚")
     st.title("PubMed RSS 閱讀器")
 
     github_repo = "xxcyl/rss-feed-processor"
@@ -52,8 +52,7 @@ def main():
         with tab:
             st.header(feed_name)
             display_feed(feed_data, feed_name)
-    
-    st.sidebar.write(f"數據最後處理時間: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        
 
 if __name__ == "__main__":
     main()
