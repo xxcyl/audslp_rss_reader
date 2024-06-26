@@ -57,15 +57,13 @@ def main():
     if data is None:
         return
     
-    # 創建標籤
-    tabs = st.tabs(list(data.keys()))
+    # 創建下拉式選單
+    feed_names = list(data.keys())
+    selected_feed = st.selectbox("選擇 RSS Feed", feed_names)
     
-    # 在每個標籤中顯示相應的 feed
-    for tab, (feed_name, feed_data) in zip(tabs, data.items()):
-        with tab:
-            st.header(feed_name)
-            display_feed(feed_data, feed_name)
-        
+    # 顯示選中的 feed
+    st.header(selected_feed)
+    display_feed(data[selected_feed], selected_feed)
 
 if __name__ == "__main__":
     main()
