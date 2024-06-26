@@ -51,8 +51,6 @@ def display_entries(data, items_per_page=10):
     
     total_entries = len(all_entries)
     total_pages = max(1, math.ceil(total_entries / items_per_page))
-    
-    st.write(f"共 {total_entries} 篇文章")
 
     # 使用 session_state 來保存當前頁碼
     if 'current_page' not in st.session_state:
@@ -118,11 +116,15 @@ def main():
     if filtered_data:
         total_feeds = len(filtered_data)
         total_articles = sum(len(feed_data['entries']) for feed_data in filtered_data.values())
-        if selected_feeds:
-            st.write(f"顯示 {total_feeds} 個選定 feed 中的 {total_articles} 篇文章")
-        else:
-            st.write(f"顯示所有 {total_feeds} 個 feed 中的 {total_articles} 篇文章")
         display_entries(filtered_data)
+        
+        # 在側邊欄底部顯示文章統計信息
+        with st.sidebar:
+            st.write("---")  # 分隔線
+            if selected_feeds:
+                st.write(f"顯示 {total_feeds} 個選定 feed 中的 {total_articles} 篇文章")
+            else:
+                st.write(f"顯示所有 {total_feeds} 個 feed 中的 {total_articles} 篇文章")
     else:
         st.write("沒有找到符合條件的文章。")
 
