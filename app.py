@@ -52,33 +52,20 @@ def display_entries(data, items_per_page=10):
     total_entries = len(all_entries)
     total_pages = max(1, math.ceil(total_entries / items_per_page))
     
-    # 顯示文章列表
-    start_idx = 0
-    end_idx = min(items_per_page, total_entries)
-    
     st.write(f"共 {total_entries} 篇文章")
-    
-    for entry, feed_title in all_entries[start_idx:end_idx]:
-        with st.expander(f"**{entry['title']}**\n*{entry['title_translated']}* (來自: {feed_title})"):
-            st.write(f"Published: {entry['published']}")
-            st.markdown(entry['tldr'])
-            st.markdown(f"[PubMed]({entry['link']})")
 
     # 底部分頁控件
-    st.write("---")
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
         page = st.number_input(f"頁碼 (共 {total_pages} 頁)", min_value=1, max_value=total_pages, value=1, step=1)
     
-    # 根據頁碼更新顯示的文章
+    # 計算當前頁的文章範圍
     start_idx = (page - 1) * items_per_page
     end_idx = min(start_idx + items_per_page, total_entries)
     
-    # 清除之前的文章列表
-    st.empty()
+    st.write(f"顯示第 {start_idx + 1} 到 {end_idx} 篇文章")
     
-    # 顯示更新後的文章列表
-    st.write(f"顯示第 {start_idx + 1} 到 {end_idx} 篇文章，共 {total_entries} 篇")
+    # 顯示當前頁的文章
     for entry, feed_title in all_entries[start_idx:end_idx]:
         with st.expander(f"**{entry['title']}**\n*{entry['title_translated']}* (來自: {feed_title})"):
             st.write(f"Published: {entry['published']}")
