@@ -24,10 +24,8 @@ def display_feed(feed_data):
             # 顯示 TL;DR 摘要
             st.markdown(entry['tldr'])
             
-            # 顯示原文鏈接
-            st.markdown(f"[閱讀原文]({entry['link']})")
-        
-        st.markdown("---")
+            # 顯示 PubMed 鏈接
+            st.markdown(f"[PubMed]({entry['link']})")
 
 def main():
     st.title("PubMed RSS 閱讀器")
