@@ -2,6 +2,7 @@ import streamlit as st
 import json
 import datetime
 import requests
+import math
 
 def load_json_data_from_github(repo, file_path):
     """從 GitHub 加載 JSON 數據"""
@@ -13,23 +14,41 @@ def load_json_data_from_github(repo, file_path):
         st.error(f"Failed to load data from GitHub. Status code: {response.status_code}")
         return None
 
-def display_feed(feed_data):
-    """顯示單個 feed 的內容"""
+def display_feed(feed_data, page=1, items_per_page=10):
+    """顯示單個 feed 的內容，帶分頁功能"""
     st.write(f"Last updated: {feed_data['feed_updated']}")
     
-    for entry in feed_data['entries']:
-        # 使用標題和翻譯標題作為展開器的標題
+    total_entries = len(feed_data['entries'])
+    total_pages = math.ceil(total_entries / items_per_page)
+    
+    start_idx = (page - 1) * items_per_page
+    end_idx = min(start_idx + items_per_page, total_entries)
+    
+    for entry in feed_data['entries'][start_idx:end_idx]:
         with st.expander(f"**{entry['title']}**\n*{entry['title_translated']}*"):
             st.write(f"Published: {entry['published']}")
-            
-            # 顯示 TL;DR 摘要
             st.markdown(entry['tldr'])
-            
-            # 顯示 PubMed 鏈接
             st.markdown(f"[PubMed]({entry['link']})")
+    
+    # 分頁控制
+    col1, col2, col3, col4, col5 = st.columns(5)
+    with col1:
+        if st.button("首頁", disabled=(page == 1)):
+            st.session_state.page = 1
+    with col2:
+        if st.button("上一頁", disabled=(page == 1)):
+            st.session_state.page -= 1
+    with col3:
+        st.write(f"第 {page} 頁，共 {total_pages} 頁")
+    with col4:
+        if st.button("下一頁", disabled=(page == total_pages)):
+            st.session_state.page += 1
+    with col5:
+        if st.button("末頁", disabled=(page == total_pages)):
+            st.session_state.page = total_pages
 
 def main():
-    st.set_page_config(page_title="PubMed RSS 閱讀器", page_icon="📚", layout="wide")
+    st.set_page_config(page_title="PubMed RSS 閱讀器", page_icon="📚", layout="centered")
     st.title("PubMed RSS 閱讀器")
 
     github_repo = "xxcyl/rss-feed-processor"
@@ -42,11 +61,15 @@ def main():
     # 創建標籤
     tabs = st.tabs(list(data.keys()))
     
+    # 初始化分頁狀態
+    if 'page' not in st.session_state:
+        st.session_state.page = 1
+    
     # 在每個標籤中顯示相應的 feed
     for tab, (feed_name, feed_data) in zip(tabs, data.items()):
         with tab:
             st.header(feed_name)
-            display_feed(feed_data)
+            display_feed(feed_data, st.session_state.page)
     
     st.sidebar.write(f"數據最後處理時間: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
