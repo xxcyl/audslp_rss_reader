@@ -15,10 +15,7 @@ def load_json_data_from_github(repo, file_path):
         return None
 
 def search_entries(data, search_term, selected_feeds):
-    """搜索所選 feed 中符合關鍵字的條目"""
-    if not search_term and not selected_feeds:
-        return data
-    
+    """搜索指定 feed 中符合關鍵字的條目"""
     result = {}
     search_term = search_term.lower() if search_term else ""
     
@@ -86,16 +83,20 @@ def main():
     with st.sidebar:
         st.header("篩選器")
         feed_names = list(data.keys())
-        selected_feeds = st.multiselect("選擇要顯示的 Feed", feed_names, default=feed_names)
+        selected_feeds = st.multiselect("選擇要顯示的 Feed", feed_names, default=[])
+        st.write("未選擇任何 Feed 時將顯示所有 Feed 的文章")
         search_term = st.text_input("搜索文章 (標題或摘要)", "")
 
     # 主內容區
-    filtered_data = search_entries(data, search_term, selected_feeds)
+    filtered_data = search_entries(data, search_term, selected_feeds if selected_feeds else None)
     
     if filtered_data:
         total_feeds = len(filtered_data)
         total_articles = sum(len(feed_data['entries']) for feed_data in filtered_data.values())
-        st.write(f"顯示 {total_feeds} 個 feed 中的 {total_articles} 篇文章")
+        if selected_feeds:
+            st.write(f"顯示 {total_feeds} 個選定 feed 中的 {total_articles} 篇文章")
+        else:
+            st.write(f"顯示所有 {total_feeds} 個 feed 中的 {total_articles} 篇文章")
         display_entries(filtered_data)
     else:
         st.write("沒有找到符合條件的文章。")
