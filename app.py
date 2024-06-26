@@ -14,12 +14,15 @@ def load_json_data_from_github(repo, file_path):
         st.error(f"Failed to load data from GitHub. Status code: {response.status_code}")
         return None
 
-def display_feed(feed_data, feed_name, page=1, items_per_page=10):
+def display_feed(feed_data, feed_name, items_per_page=10):
     """顯示單個 feed 的內容，帶分頁功能"""
     st.write(f"Last updated: {feed_data['feed_updated']}")
     
     total_entries = len(feed_data['entries'])
-    total_pages = math.ceil(total_entries / items_per_page)
+    total_pages = max(1, math.ceil(total_entries / items_per_page))
+    
+    # 使用 number_input 進行分頁
+    page = st.number_input(f"頁碼 (共 {total_pages} 頁)", min_value=1, max_value=total_pages, value=1, step=1, key=f"{feed_name}_page")
     
     start_idx = (page - 1) * items_per_page
     end_idx = min(start_idx + items_per_page, total_entries)
@@ -29,26 +32,9 @@ def display_feed(feed_data, feed_name, page=1, items_per_page=10):
             st.write(f"Published: {entry['published']}")
             st.markdown(entry['tldr'])
             st.markdown(f"[PubMed]({entry['link']})")
-    
-    # 分頁控制
-    col1, col2, col3, col4, col5 = st.columns(5)
-    with col1:
-        if st.button("首頁", key=f"{feed_name}_first", disabled=(page == 1)):
-            st.session_state[f"{feed_name}_page"] = 1
-    with col2:
-        if st.button("上一頁", key=f"{feed_name}_prev", disabled=(page == 1)):
-            st.session_state[f"{feed_name}_page"] -= 1
-    with col3:
-        st.write(f"第 {page} 頁，共 {total_pages} 頁")
-    with col4:
-        if st.button("下一頁", key=f"{feed_name}_next", disabled=(page == total_pages)):
-            st.session_state[f"{feed_name}_page"] += 1
-    with col5:
-        if st.button("末頁", key=f"{feed_name}_last", disabled=(page == total_pages)):
-            st.session_state[f"{feed_name}_page"] = total_pages
 
 def main():
-    st.set_page_config(page_title="PubMed RSS 閱讀器", page_icon="📚")
+    st.set_page_config(page_title="PubMed RSS 閱讀器", page_icon="📚", layout="wide")
     st.title("PubMed RSS 閱讀器")
 
     github_repo = "xxcyl/rss-feed-processor"
@@ -65,10 +51,7 @@ def main():
     for tab, (feed_name, feed_data) in zip(tabs, data.items()):
         with tab:
             st.header(feed_name)
-            # 初始化或更新分頁狀態
-            if f"{feed_name}_page" not in st.session_state:
-                st.session_state[f"{feed_name}_page"] = 1
-            display_feed(feed_data, feed_name, st.session_state[f"{feed_name}_page"])
+            display_feed(feed_data, feed_name)
     
     st.sidebar.write(f"數據最後處理時間: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
