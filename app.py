@@ -109,10 +109,11 @@ def main():
         # 將期刊名稱按字母順序排序
         feed_names = sorted(list(data.keys()))
         
-        # 使用 checkbox 來選擇期刊
+        # 使用 checkbox 來選擇期刊，並顯示文章數量
         selected_feeds = []
         for feed in feed_names:
-            if st.checkbox(feed, key=feed):
+            article_count = len(data[feed]['entries'])
+            if st.checkbox(f"{feed} ({article_count})", key=feed):
                 selected_feeds.append(feed)
 
     # 檢查是否需要重置頁碼
