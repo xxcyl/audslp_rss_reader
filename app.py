@@ -15,7 +15,7 @@ def load_json_data_from_github(repo, file_path):
         return None
 
 def search_entries(data, search_term, selected_feeds):
-    """搜索指定 feed 中符合關鍵字的條目"""
+    """搜索指定期刊中符合關鍵字的條目"""
     result = {}
     search_term = search_term.lower() if search_term else ""
     
@@ -42,7 +42,7 @@ def search_entries(data, search_term, selected_feeds):
     return result
 
 def display_entries(data, items_per_page=10):
-    """顯示所有選中 feed 的條目，帶分頁功能"""
+    """顯示所有選中期刊的條目，帶分頁功能"""
     all_entries = []
     for feed_name, feed_data in data.items():
         all_entries.extend([(entry, feed_name) for entry in feed_data['entries']])
@@ -103,13 +103,13 @@ def main():
     
     # 側邊欄：篩選器
     with st.sidebar:
-        # 搜索框移到最上方
-        search_term = st.text_input("搜索文章 (標題或摘要)", "")
+        # 搜索框移到最上方，添加 emoji
+        search_term = st.text_input("🔍 搜索文章 (標題或摘要)", "")
         
-        # 將 feed 名稱按字母順序排序
+        # 將期刊名稱按字母順序排序
         feed_names = sorted(list(data.keys()))
         
-        # 使用 checkbox 來選擇 feed
+        # 使用 checkbox 來選擇期刊
         selected_feeds = []
         for feed in feed_names:
             if st.checkbox(feed, key=feed):
@@ -128,9 +128,9 @@ def main():
         total_feeds = len(filtered_data)
         total_articles = sum(len(feed_data['entries']) for feed_data in filtered_data.values())
         
-        # 在側邊欄搜索框下方顯示文章統計信息
+        # 在側邊欄搜索框下方顯示文章統計信息，添加 emoji
         with st.sidebar:
-            st.write(f"顯示 {total_feeds} 個 feed 中的 {total_articles} 篇文章")
+            st.write(f"📊 顯示 {total_feeds} 個期刊中的 {total_articles} 篇文章")
             st.write("---")  # 分隔線
         
         display_entries(filtered_data)
