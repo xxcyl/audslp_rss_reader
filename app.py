@@ -106,8 +106,6 @@ def main():
         # 搜索框移到最上方
         search_term = st.text_input("搜索文章 (標題或摘要)", "")
         
-        st.write("---")  # 分隔線
-        
         # 將 feed 名稱按字母順序排序
         feed_names = sorted(list(data.keys()))
         
@@ -116,9 +114,6 @@ def main():
         for feed in feed_names:
             if st.checkbox(feed, key=feed):
                 selected_feeds.append(feed)
-        
-        st.write("---")  # 分隔線
-        st.write("未選擇任何 Feed 時將顯示所有 Feed 的文章")
 
     # 檢查是否需要重置頁碼
     if search_term != st.session_state.previous_search or selected_feeds != st.session_state.previous_feeds:
@@ -132,15 +127,13 @@ def main():
     if filtered_data:
         total_feeds = len(filtered_data)
         total_articles = sum(len(feed_data['entries']) for feed_data in filtered_data.values())
-        display_entries(filtered_data)
         
-        # 在側邊欄底部顯示文章統計信息
+        # 在側邊欄搜索框下方顯示文章統計信息
         with st.sidebar:
+            st.write(f"顯示 {total_feeds} 個 feed 中的 {total_articles} 篇文章")
             st.write("---")  # 分隔線
-            if selected_feeds:
-                st.write(f"顯示 {total_feeds} 個選定 feed 中的 {total_articles} 篇文章")
-            else:
-                st.write(f"顯示所有 {total_feeds} 個 feed 中的 {total_articles} 篇文章")
+        
+        display_entries(filtered_data)
     else:
         st.write("沒有找到符合條件的文章。")
 
