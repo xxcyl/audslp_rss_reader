@@ -21,12 +21,11 @@ def display_feed(feed_data, feed_name, items_per_page=10):
     total_entries = len(feed_data['entries'])
     total_pages = max(1, math.ceil(total_entries / items_per_page))
     
-    # 使用 session_state 來保存頁碼狀態
+    # 顯示文章內容
     if f"{feed_name}_page" not in st.session_state:
         st.session_state[f"{feed_name}_page"] = 1
     
     page = st.session_state[f"{feed_name}_page"]
-    
     start_idx = (page - 1) * items_per_page
     end_idx = min(start_idx + items_per_page, total_entries)
     
