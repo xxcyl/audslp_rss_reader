@@ -79,10 +79,8 @@ def main():
     if data is None:
         return
     
-    # 使用兩列佈局
-    col1, col2 = st.columns([1, 3])
-    
-    with col1:
+    # 側邊欄：篩選器
+    with st.sidebar:
         st.header("篩選器")
         feed_names = list(data.keys())
         
@@ -104,19 +102,18 @@ def main():
             st.experimental_rerun()
 
     # 主內容區
-    with col2:
-        filtered_data = search_entries(data, search_term, selected_feeds if selected_feeds else None)
-        
-        if filtered_data:
-            total_feeds = len(filtered_data)
-            total_articles = sum(len(feed_data['entries']) for feed_data in filtered_data.values())
-            if selected_feeds:
-                st.write(f"顯示 {total_feeds} 個選定 feed 中的 {total_articles} 篇文章")
-            else:
-                st.write(f"顯示所有 {total_feeds} 個 feed 中的 {total_articles} 篇文章")
-            display_entries(filtered_data)
+    filtered_data = search_entries(data, search_term, selected_feeds if selected_feeds else None)
+    
+    if filtered_data:
+        total_feeds = len(filtered_data)
+        total_articles = sum(len(feed_data['entries']) for feed_data in filtered_data.values())
+        if selected_feeds:
+            st.write(f"顯示 {total_feeds} 個選定 feed 中的 {total_articles} 篇文章")
         else:
-            st.write("沒有找到符合條件的文章。")
+            st.write(f"顯示所有 {total_feeds} 個 feed 中的 {total_articles} 篇文章")
+        display_entries(filtered_data)
+    else:
+        st.write("沒有找到符合條件的文章。")
 
 if __name__ == "__main__":
     main()
