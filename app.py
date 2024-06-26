@@ -51,16 +51,12 @@ def display_entries(data, items_per_page=10):
     
     total_entries = len(all_entries)
     total_pages = max(1, math.ceil(total_entries / items_per_page))
-
-    # 使用 session_state 來保存當前頁碼
-    if 'current_page' not in st.session_state:
-        st.session_state.current_page = 1
-
-    # 顯示文章列表
-    start_idx = (st.session_state.current_page - 1) * items_per_page
-    end_idx = min(start_idx + items_per_page, total_entries)
     
-    st.write(f"顯示第 {start_idx + 1} 到 {end_idx} 篇文章，共 {total_entries} 篇")
+    # 顯示文章列表
+    start_idx = 0
+    end_idx = min(items_per_page, total_entries)
+    
+    st.write(f"共 {total_entries} 篇文章")
     
     for entry, feed_title in all_entries[start_idx:end_idx]:
         with st.expander(f"**{entry['title']}**\n*{entry['title_translated']}* (來自: {feed_title})"):
@@ -70,30 +66,24 @@ def display_entries(data, items_per_page=10):
 
     # 底部分頁控件
     st.write("---")
-    col1, col2, col3, col4, col5 = st.columns(5)
-    
-    with col1:
-        if st.button("◀◀ 首頁"):
-            st.session_state.current_page = 1
-            st.experimental_rerun()
-    
+    col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        if st.button("◀ 上一頁") and st.session_state.current_page > 1:
-            st.session_state.current_page -= 1
-            st.experimental_rerun()
+        page = st.number_input(f"頁碼 (共 {total_pages} 頁)", min_value=1, max_value=total_pages, value=1, step=1)
     
-    with col3:
-        st.write(f"第 {st.session_state.current_page} 頁，共 {total_pages} 頁")
+    # 根據頁碼更新顯示的文章
+    start_idx = (page - 1) * items_per_page
+    end_idx = min(start_idx + items_per_page, total_entries)
     
-    with col4:
-        if st.button("下一頁 ▶") and st.session_state.current_page < total_pages:
-            st.session_state.current_page += 1
-            st.experimental_rerun()
+    # 清除之前的文章列表
+    st.empty()
     
-    with col5:
-        if st.button("末頁 ▶▶"):
-            st.session_state.current_page = total_pages
-            st.experimental_rerun()
+    # 顯示更新後的文章列表
+    st.write(f"顯示第 {start_idx + 1} 到 {end_idx} 篇文章，共 {total_entries} 篇")
+    for entry, feed_title in all_entries[start_idx:end_idx]:
+        with st.expander(f"**{entry['title']}**\n*{entry['title_translated']}* (來自: {feed_title})"):
+            st.write(f"Published: {entry['published']}")
+            st.markdown(entry['tldr'])
+            st.markdown(f"[PubMed]({entry['link']})")
 
 def main():
     st.set_page_config(page_title="聽力期刊速報", page_icon="📚", layout="wide")
