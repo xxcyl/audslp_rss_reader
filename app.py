@@ -21,17 +21,30 @@ def display_feed(feed_data, feed_name, items_per_page=10):
     total_entries = len(feed_data['entries'])
     total_pages = max(1, math.ceil(total_entries / items_per_page))
 
-    # 使用 number_input 進行分頁
-    page = st.number_input(f"頁碼 (共 {total_pages} 頁)", min_value=1, max_value=total_pages, value=1, step=1, key=f"{feed_name}_page")
+    # 先創建一個空的佔位符來顯示分頁控件
+    paging_placeholder = st.empty()
+    
+    # 顯示內容
+    entries_placeholder = st.empty()
+    
+    # 在底部創建分頁控件
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        page = st.number_input(f"頁碼 (共 {total_pages} 頁)", min_value=1, max_value=total_pages, value=1, step=1, key=f"{feed_name}_page")
     
     start_idx = (page - 1) * items_per_page
     end_idx = min(start_idx + items_per_page, total_entries)
     
-    for entry in feed_data['entries'][start_idx:end_idx]:
-        with st.expander(f"**{entry['title']}**\n*{entry['title_translated']}*"):
-            st.write(f"Published: {entry['published']}")
-            st.markdown(entry['tldr'])
-            st.markdown(f"[PubMed]({entry['link']})")
+    # 使用 entries_placeholder 顯示內容
+    with entries_placeholder.container():
+        for entry in feed_data['entries'][start_idx:end_idx]:
+            with st.expander(f"**{entry['title']}**\n*{entry['title_translated']}*"):
+                st.write(f"Published: {entry['published']}")
+                st.markdown(entry['tldr'])
+                st.markdown(f"[PubMed]({entry['link']})")
+    
+    # 使用 paging_placeholder 在頂部顯示當前頁碼信息
+    paging_placeholder.write(f"當前頁面: {page} / {total_pages}")
             
 def main():
     st.set_page_config(page_title="聽力期刊速報", page_icon="📚")
