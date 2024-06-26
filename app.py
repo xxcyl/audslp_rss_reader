@@ -81,7 +81,11 @@ def main():
     
     # 側邊欄：篩選器
     with st.sidebar:
-        st.header("篩選器")
+        # 搜索框移到最上方
+        search_term = st.text_input("搜索文章 (標題或摘要)", "")
+        
+        st.write("---")  # 分隔線
+        
         feed_names = list(data.keys())
         
         # 使用 checkbox 來選擇 feed
@@ -90,16 +94,8 @@ def main():
             if st.checkbox(feed, key=feed):
                 selected_feeds.append(feed)
         
+        st.write("---")  # 分隔線
         st.write("未選擇任何 Feed 時將顯示所有 Feed 的文章")
-        
-        # 搜索框
-        search_term = st.text_input("搜索文章 (標題或摘要)", "")
-        
-        # 添加一個"重置選擇"按鈕
-        if st.button("重置選擇"):
-            for feed in feed_names:
-                st.session_state[feed] = False
-            st.experimental_rerun()
 
     # 主內容區
     filtered_data = search_entries(data, search_term, selected_feeds if selected_feeds else None)
