@@ -79,27 +79,44 @@ def main():
     if data is None:
         return
     
-    # 側邊欄：篩選器
-    with st.sidebar:
+    # 使用兩列佈局
+    col1, col2 = st.columns([1, 3])
+    
+    with col1:
         st.header("篩選器")
         feed_names = list(data.keys())
-        selected_feeds = st.multiselect("選擇要顯示的 Feed", feed_names, default=[])
+        
+        # 使用 checkbox 來選擇 feed
+        selected_feeds = []
+        for feed in feed_names:
+            if st.checkbox(feed, key=feed):
+                selected_feeds.append(feed)
+        
         st.write("未選擇任何 Feed 時將顯示所有 Feed 的文章")
+        
+        # 搜索框
         search_term = st.text_input("搜索文章 (標題或摘要)", "")
+        
+        # 添加一個"重置選擇"按鈕
+        if st.button("重置選擇"):
+            for feed in feed_names:
+                st.session_state[feed] = False
+            st.experimental_rerun()
 
     # 主內容區
-    filtered_data = search_entries(data, search_term, selected_feeds if selected_feeds else None)
-    
-    if filtered_data:
-        total_feeds = len(filtered_data)
-        total_articles = sum(len(feed_data['entries']) for feed_data in filtered_data.values())
-        if selected_feeds:
-            st.write(f"顯示 {total_feeds} 個選定 feed 中的 {total_articles} 篇文章")
+    with col2:
+        filtered_data = search_entries(data, search_term, selected_feeds if selected_feeds else None)
+        
+        if filtered_data:
+            total_feeds = len(filtered_data)
+            total_articles = sum(len(feed_data['entries']) for feed_data in filtered_data.values())
+            if selected_feeds:
+                st.write(f"顯示 {total_feeds} 個選定 feed 中的 {total_articles} 篇文章")
+            else:
+                st.write(f"顯示所有 {total_feeds} 個 feed 中的 {total_articles} 篇文章")
+            display_entries(filtered_data)
         else:
-            st.write(f"顯示所有 {total_feeds} 個 feed 中的 {total_articles} 篇文章")
-        display_entries(filtered_data)
-    else:
-        st.write("沒有找到符合條件的文章。")
+            st.write("沒有找到符合條件的文章。")
 
 if __name__ == "__main__":
     main()
