@@ -52,37 +52,47 @@ def display_entries(data, items_per_page=10):
     total_entries = len(all_entries)
     total_pages = max(1, math.ceil(total_entries / items_per_page))
 
-    # 使用 session_state 來保存當前頁碼
-    if 'current_page' not in st.session_state:
-        st.session_state.current_page = 1
+    # 確保當前頁碼不超過總頁數
+    st.session_state.current_page = min(st.session_state.current_page, total_pages)
 
     # 計算當前頁的文章範圍
     start_idx = (st.session_state.current_page - 1) * items_per_page
     end_idx = min(start_idx + items_per_page, total_entries)
     
-    st.write(f"顯示第 {start_idx + 1} 到 {end_idx} 篇文章")
+    if total_entries > 0:
+        st.write(f"顯示第 {start_idx + 1} 到 {end_idx} 篇文章")
     
-    # 顯示當前頁的文章
-    for entry, feed_name in all_entries[start_idx:end_idx]:
-        with st.expander(f"**{entry['title']}**\n*{entry['title_translated']}* (來自: {feed_name})"):
-            st.write(f"Published: {entry['published']}")
-            st.markdown(entry['tldr'])
-            st.markdown(f"[PubMed]({entry['link']})")
+        # 顯示當前頁的文章
+        for entry, feed_name in all_entries[start_idx:end_idx]:
+            with st.expander(f"**{entry['title']}**\n*{entry['title_translated']}* (來自: {feed_name})"):
+                st.write(f"Published: {entry['published']}")
+                st.markdown(entry['tldr'])
+                st.markdown(f"[PubMed]({entry['link']})")
 
-    # 底部分頁控件
-    st.write("---")
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        page = st.number_input(f"頁碼 (共 {total_pages} 頁)", min_value=1, max_value=total_pages, value=st.session_state.current_page, step=1, key="page_number")
-    
-    # 如果頁碼改變，更新 session_state 並重新運行
-    if page != st.session_state.current_page:
-        st.session_state.current_page = page
-        st.experimental_rerun()
+        # 底部分頁控件
+        st.write("---")
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            page = st.number_input(f"頁碼 (共 {total_pages} 頁)", min_value=1, max_value=total_pages, value=st.session_state.current_page, step=1, key="page_number")
+        
+        # 如果頁碼改變，更新 session_state
+        if page != st.session_state.current_page:
+            st.session_state.current_page = page
+            st.experimental_rerun()
+    else:
+        st.write("沒有找到符合條件的文章。")
 
 def main():
     st.set_page_config(page_title="聽力期刊速報", page_icon="📚", layout="wide")
     st.title("📚 聽力期刊速報")
+
+    # 初始化 session_state
+    if 'current_page' not in st.session_state:
+        st.session_state.current_page = 1
+    if 'previous_search' not in st.session_state:
+        st.session_state.previous_search = ""
+    if 'previous_feeds' not in st.session_state:
+        st.session_state.previous_feeds = []
 
     github_repo = "xxcyl/rss-feed-processor"
     file_path = "rss_data_bilingual.json"
@@ -109,6 +119,12 @@ def main():
         
         st.write("---")  # 分隔線
         st.write("未選擇任何 Feed 時將顯示所有 Feed 的文章")
+
+    # 檢查是否需要重置頁碼
+    if search_term != st.session_state.previous_search or selected_feeds != st.session_state.previous_feeds:
+        st.session_state.current_page = 1
+        st.session_state.previous_search = search_term
+        st.session_state.previous_feeds = selected_feeds
 
     # 主內容區
     filtered_data = search_entries(data, search_term, selected_feeds if selected_feeds else None)
