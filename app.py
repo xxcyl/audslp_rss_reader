@@ -34,8 +34,8 @@ def display_feed(feed_data, feed_name, items_per_page=10):
             st.markdown(f"[PubMed]({entry['link']})")
             
 def main():
-    st.set_page_config(page_title="PubMed RSS 閱讀器", page_icon="📚")
-    st.title("PubMed RSS 閱讀器")
+    st.set_page_config(page_title="聽力期刊速報", page_icon="📚")
+    st.title("📚 聽力期刊速報")
 
     github_repo = "xxcyl/rss-feed-processor"
     file_path = "rss_data_bilingual.json"
