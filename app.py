@@ -20,33 +20,38 @@ def display_feed(feed_data):
         st.subheader(f"{entry['title']} - {entry['title_translated']}")
         st.write(f"Published: {entry['published']}")
         
-        # 添加一個展開/收起的部分來顯示完整內容
-        with st.expander("顯示全文翻譯"):
-            st.markdown(entry['full_content_translated'])
+        # 顯示 TL;DR 摘要
+        st.markdown(entry['tldr'])
+        
+        # 添加一個展開/收起的部分來顯示原文內容
+        with st.expander("顯示原文"):
+            st.markdown(entry['full_content'])
         
         st.markdown(f"[閱讀原文]({entry['link']})")
         st.markdown("---")
 
 def main():
     st.title("PubMed RSS 閱讀器")
+    
     github_repo = "xxcyl/rss-feed-processor"
     file_path = "rss_data_bilingual.json"
+    
     data = load_json_data_from_github(github_repo, file_path)
     if data is None:
         return
-
+    
     # 創建側邊欄選擇器
     selected_feed = st.sidebar.selectbox(
         "選擇 RSS feed",
         options=list(data.keys())
     )
-
+    
     # 顯示選定的 feed
     if selected_feed in data:
         display_feed(data[selected_feed])
     else:
         st.write("請從側邊欄選擇一個 feed。")
-
+    
     st.sidebar.write(f"數據最後處理時間: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
 if __name__ == "__main__":
