@@ -4,6 +4,7 @@ import datetime
 import requests
 
 def load_json_data_from_github(repo, file_path):
+    """從 GitHub 加載 JSON 數據"""
     url = f"https://raw.githubusercontent.com/{repo}/main/{file_path}"
     response = requests.get(url)
     if response.status_code == 200:
@@ -13,7 +14,7 @@ def load_json_data_from_github(repo, file_path):
         return None
 
 def display_feed(feed_data):
-    st.header(feed_data['feed_title'])
+    """顯示單個 feed 的內容"""
     st.write(f"Last updated: {feed_data['feed_updated']}")
     
     for entry in feed_data['entries']:
@@ -28,8 +29,9 @@ def display_feed(feed_data):
             st.markdown(f"[PubMed]({entry['link']})")
 
 def main():
+    st.set_page_config(page_title="PubMed RSS 閱讀器", page_icon="📚", layout="wide")
     st.title("PubMed RSS 閱讀器")
-    
+
     github_repo = "xxcyl/rss-feed-processor"
     file_path = "rss_data_bilingual.json"
     
@@ -37,17 +39,14 @@ def main():
     if data is None:
         return
     
-    # 創建側邊欄選擇器
-    selected_feed = st.sidebar.selectbox(
-        "選擇 RSS feed",
-        options=list(data.keys())
-    )
+    # 創建標籤
+    tabs = st.tabs(list(data.keys()))
     
-    # 顯示選定的 feed
-    if selected_feed in data:
-        display_feed(data[selected_feed])
-    else:
-        st.write("請從側邊欄選擇一個 feed。")
+    # 在每個標籤中顯示相應的 feed
+    for tab, (feed_name, feed_data) in zip(tabs, data.items()):
+        with tab:
+            st.header(feed_name)
+            display_feed(feed_data)
     
     st.sidebar.write(f"數據最後處理時間: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
