@@ -62,10 +62,10 @@ def display_entries(data, items_per_page=10):
     if total_entries > 0:
         # 顯示當前頁的文章
         for entry, feed_name in all_entries[start_idx:end_idx]:
-            with st.expander(f"📍 **{entry['title']}**\n*{entry['title_translated']}*"):
+            with st.expander(f"**{entry['title']}**\n*{entry['title_translated']}* (來自: {feed_name})"):
                 st.write(f"Published: {entry['published']}")
                 st.markdown(entry['tldr'])
-                st.markdown(f"🔗 [PubMed]({entry['link']}) 📚 來自: {feed_name}")
+                st.markdown(f"[PubMed]({entry['link']})")
 
         # 底部分頁控件
         st.write("---")
@@ -79,6 +79,38 @@ def display_entries(data, items_per_page=10):
             st.experimental_rerun()
     else:
         st.write("沒有找到符合條件的文章。")
+
+def show_introduction():
+    """顯示系統介紹"""
+    st.markdown("""
+    # 📚 聽力期刊速報系統介紹
+
+    這個系統旨在幫助您輕鬆獲取和瀏覽最新的聽力學研究文獻。
+
+    ## 🌟 主要功能
+
+    - 📰 瀏覽多個聽力學期刊的最新文章
+    - 🔍 使用關鍵字搜索感興趣的文章
+    - 📊 選擇特定期刊進行閱讀
+    - ℹ️ 查看文章的中英文標題、發布日期和中文摘要
+    - 🔗 直接跳轉到 PubMed 閱讀全文
+
+    ## 💡 系統特點
+
+    - 🔄 自動更新：定期獲取最新研究資訊
+    - 🌐 雙語支持：提供英文原文和中文翻譯
+    - 🧠 AI 摘要：每篇文章都有 AI 生成的中文 TL;DR
+    - 🔎 靈活搜索：輕鬆找到感興趣的研究主題
+    - 📂 分類瀏覽：按期刊分類查看文章
+
+    ## 👥 適用對象
+
+    - 聽力學研究者
+    - 臨床醫生
+    - 對聽力學感興趣的學生
+
+    希望這個工具能幫助您更便捷地跟進聽力學領域的最新研究進展！
+    """)
 
 def main():
     st.set_page_config(page_title="聽力期刊速報", page_icon="📚", layout="wide")
@@ -98,45 +130,52 @@ def main():
     if data is None:
         return
     
-    # 側邊欄：篩選器
-    with st.sidebar:
-        # 將標題移到側邊欄最上方
-        st.title("📚 聽力期刊速報")
-        
-        # 搜索框
-        search_term = st.text_input("🔍 搜索文章 (標題或摘要)", "")
-        
-        # 將期刊名稱按字母順序排序
-        feed_names = sorted(list(data.keys()))
-        
-        # 使用 checkbox 來選擇期刊，並顯示文章數量
-        selected_feeds = []
-        for feed in feed_names:
-            article_count = len(data[feed]['entries'])
-            if st.checkbox(f"{feed} ({article_count})", key=feed):
-                selected_feeds.append(feed)
-
-    # 檢查是否需要重置頁碼
-    if search_term != st.session_state.previous_search or selected_feeds != st.session_state.previous_feeds:
-        st.session_state.current_page = 1
-        st.session_state.previous_search = search_term
-        st.session_state.previous_feeds = selected_feeds
-
-    # 主內容區
-    filtered_data = search_entries(data, search_term, selected_feeds if selected_feeds else None)
+    # 主要內容區
+    tab1, tab2 = st.tabs(["🏠 主頁", "ℹ️ 系統介紹"])
     
-    if filtered_data:
-        total_feeds = len(filtered_data)
-        total_articles = sum(len(feed_data['entries']) for feed_data in filtered_data.values())
-        
-        # 在側邊欄搜索框下方顯示文章統計信息
+    with tab1:
+        # 側邊欄：篩選器
         with st.sidebar:
-            st.write(f"📊 顯示 {total_feeds} 個期刊中的 {total_articles} 篇文章")
-            st.write("---")  # 分隔線
+            # 將標題移到側邊欄最上方
+            st.title("📚 聽力期刊速報")
+            
+            # 搜索框
+            search_term = st.text_input("🔍 搜索文章 (標題或摘要)", "")
+            
+            # 將期刊名稱按字母順序排序
+            feed_names = sorted(list(data.keys()))
+            
+            # 使用 checkbox 來選擇期刊，並顯示文章數量
+            selected_feeds = []
+            for feed in feed_names:
+                article_count = len(data[feed]['entries'])
+                if st.checkbox(f"{feed} ({article_count})", key=feed):
+                    selected_feeds.append(feed)
+
+        # 檢查是否需要重置頁碼
+        if search_term != st.session_state.previous_search or selected_feeds != st.session_state.previous_feeds:
+            st.session_state.current_page = 1
+            st.session_state.previous_search = search_term
+            st.session_state.previous_feeds = selected_feeds
+
+        # 主內容區
+        filtered_data = search_entries(data, search_term, selected_feeds if selected_feeds else None)
         
-        display_entries(filtered_data)
-    else:
-        st.write("沒有找到符合條件的文章。")
+        if filtered_data:
+            total_feeds = len(filtered_data)
+            total_articles = sum(len(feed_data['entries']) for feed_data in filtered_data.values())
+            
+            # 在側邊欄搜索框下方顯示文章統計信息
+            with st.sidebar:
+                st.write(f"📊 顯示 {total_feeds} 個期刊中的 {total_articles} 篇文章")
+                st.write("---")  # 分隔線
+            
+            display_entries(filtered_data)
+        else:
+            st.write("沒有找到符合條件的文章。")
+    
+    with tab2:
+        show_introduction()
 
 if __name__ == "__main__":
     main()
