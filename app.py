@@ -62,7 +62,7 @@ def display_entries(data, items_per_page=10):
     if total_entries > 0:
         # 顯示當前頁的文章
         for entry, feed_name in all_entries[start_idx:end_idx]:
-            with st.expander(f"**{entry['title']}**\n*{entry['title_translated']}* (來自: {feed_name})"):
+            with st.expander(f"📍 **{entry['title']}**\n*{entry['title_translated']}* (來自: {feed_name})"):
                 st.write(f"Published: {entry['published']}")
                 st.markdown(entry['tldr'])
                 st.markdown(f"[PubMed]({entry['link']})")
