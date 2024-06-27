@@ -99,7 +99,7 @@ def show_introduction():
     """)
     
 def main():
-    st.set_page_config(page_title="聽力與語言治療期刊速報", page_icon="📚", layout="wide")
+    st.set_page_config(page_title="聽語期刊速報", page_icon="📚", layout="wide")
 
     # 初始化 session_state
     if 'current_page' not in st.session_state:
@@ -122,15 +122,16 @@ def main():
     with tab1:
         # 側邊欄：篩選器
         with st.sidebar:
-            st.title("📚 聽力與語言治療期刊速報")
+            st.title("📚 聽語期刊速報")
             
             # 搜索框
             search_term = st.text_input("🔍 搜索文章 (標題或摘要)", "")
             
             # 預定義期刊類別
             categories = {
-                "聽力學": ["Ear and Hearing", "Journal of the American Academy of Audiology", "International Journal of Audiology"],
-                "語言治療": ["Journal of Speech, Language, and Hearing Research", "American Journal of Speech-Language Pathology", "Language, Speech, and Hearing Services in Schools"],
+                "聽力學": ["Ear and Hearing", "Hearing Research", "Trends in Hearing", "International Journal of Audiology", "Journal of Audiology and Otology", "American Journal of Audiology", "Seminars in Hearing", "Audiology and Neurotology"],
+                "語言治療": ["Dysphagia", "American Journal of Speech-Language Pathology"],
+                "橫跨兩類": ["Journal of Speech, Language, and Hearing Research", "Language, Speech, and Hearing Services in Schools"]
             }
             
             selected_feeds = []
@@ -138,20 +139,17 @@ def main():
             # 為每個類別創建一個可折疊的部分
             for category, journals in categories.items():
                 with st.expander(f"📂 {category}", expanded=True):
-                    for feed in sorted(data.keys()):
-                        if feed in journals:
+                    for feed in sorted(journals):
+                        if feed in data:
                             article_count = len(data[feed]['entries'])
                             if st.checkbox(f"{feed} ({article_count})", key=feed):
                                 selected_feeds.append(feed)
             
-            # 處理未分類的期刊
-            uncategorized_journals = [feed for feed in data.keys() if feed not in [j for c in categories.values() for j in c]]
+            # 檢查是否有未分類的期刊
+            all_categorized_journals = [j for c in categories.values() for j in c]
+            uncategorized_journals = [feed for feed in data.keys() if feed not in all_categorized_journals]
             if uncategorized_journals:
-                with st.expander("📂 其他", expanded=True):
-                    for feed in sorted(uncategorized_journals):
-                        article_count = len(data[feed]['entries'])
-                        if st.checkbox(f"{feed} ({article_count})", key=feed):
-                            selected_feeds.append(feed)
+                st.warning(f"警告：以下期刊未被分類：{', '.join(uncategorized_journals)}")
 
         # 檢查是否需要重置頁碼
         if search_term != st.session_state.previous_search or selected_feeds != st.session_state.previous_feeds:
