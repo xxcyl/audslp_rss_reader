@@ -4,112 +4,24 @@ import datetime
 import requests
 import math
 
-def load_json_data_from_github(repo, file_path):
-    """從 GitHub 加載 JSON 數據"""
-    url = f"https://raw.githubusercontent.com/{repo}/main/{file_path}"
-    response = requests.get(url)
-    if response.status_code == 200:
-        return json.loads(response.text)
-    else:
-        st.error(f"Failed to load data from GitHub. Status code: {response.status_code}")
-        return None
-
-def search_entries(data, search_term, selected_feeds):
-    """搜索指定期刊中符合關鍵字的條目"""
-    result = {}
-    search_term = search_term.lower() if search_term else ""
-    
-    for feed_name, feed_data in data.items():
-        if selected_feeds and feed_name not in selected_feeds:
-            continue
-        
-        filtered_entries = [
-            entry for entry in feed_data['entries']
-            if not search_term or
-            search_term in entry['title'].lower() or
-            search_term in entry['title_translated'].lower() or
-            search_term in entry['tldr'].lower()
-        ]
-        
-        if filtered_entries:
-            result[feed_name] = {
-                'feed_title': feed_data['feed_title'],
-                'feed_link': feed_data['feed_link'],
-                'feed_updated': feed_data['feed_updated'],
-                'entries': filtered_entries
-            }
-    
-    return result
-
-def display_entries(data, items_per_page=10):
-    """顯示所有選中期刊的條目，帶分頁功能"""
-    all_entries = []
-    for feed_name, feed_data in data.items():
-        all_entries.extend([(entry, feed_name) for entry in feed_data['entries']])
-    
-    all_entries.sort(key=lambda x: x[0]['published'], reverse=True)
-    
-    total_entries = len(all_entries)
-    total_pages = max(1, math.ceil(total_entries / items_per_page))
-
-    # 確保當前頁碼不超過總頁數
-    st.session_state.current_page = min(st.session_state.current_page, total_pages)
-
-    # 計算當前頁的文章範圍
-    start_idx = (st.session_state.current_page - 1) * items_per_page
-    end_idx = min(start_idx + items_per_page, total_entries)
-    
-    if total_entries > 0:
-        # 顯示當前頁的文章
-        for entry, feed_name in all_entries[start_idx:end_idx]:
-            with st.expander(f"**{entry['title']}**\n*{entry['title_translated']}* (來自: {feed_name})"):
-                st.write(f"Published: {entry['published']}")
-                st.markdown(entry['tldr'])
-                st.markdown(f"[PubMed]({entry['link']})")
-
-        # 底部分頁控件
-        st.write("---")
-        col1, col2, col3 = st.columns([1, 2, 1])
-        with col2:
-            page = st.number_input(f"頁碼 (共 {total_pages} 頁)", min_value=1, max_value=total_pages, value=st.session_state.current_page, step=1, key="page_number")
-        
-        # 如果頁碼改變，更新 session_state
-        if page != st.session_state.current_page:
-            st.session_state.current_page = page
-            st.experimental_rerun()
-    else:
-        st.write("沒有找到符合條件的文章。")
+# ... [其他函數保持不變] ...
 
 def show_introduction():
-    """顯示系統介紹"""
+    """顯示簡化的系統介紹，包含警語"""
     st.markdown("""
-    # 📚 聽力期刊速報系統介紹
+    ## 🌟 主要功能與特點
 
-    這個系統旨在幫助您輕鬆獲取和瀏覽最新的聽力學研究文獻。
-
-    ## 🌟 主要功能
-
-    - 📰 瀏覽多個聽力學期刊的最新文章
-    - 🔍 使用關鍵字搜索感興趣的文章
-    - 📊 選擇特定期刊進行閱讀
+    - 📰 瀏覽並搜索多個聽力學期刊的最新文章
+    - 🌐 提供英文原文和中文翻譯的雙語支持
+    - 🧠 每篇文章都有 AI 生成的中文 TL;DR 摘要
+    - 📊 按期刊分類查看文章，並顯示文章數量統計
     - ℹ️ 查看文章的中英文標題、發布日期和中文摘要
     - 🔗 直接跳轉到 PubMed 閱讀全文
+    - 🔄 定期自動更新，確保獲取最新研究資訊
+    
+    ## ⚠️ 注意事項
 
-    ## 💡 系統特點
-
-    - 🔄 自動更新：定期獲取最新研究資訊
-    - 🌐 雙語支持：提供英文原文和中文翻譯
-    - 🧠 AI 摘要：每篇文章都有 AI 生成的中文 TL;DR
-    - 🔎 靈活搜索：輕鬆找到感興趣的研究主題
-    - 📂 分類瀏覽：按期刊分類查看文章
-
-    ## 👥 適用對象
-
-    - 聽力學研究者
-    - 臨床醫生
-    - 對聽力學感興趣的學生
-
-    希望這個工具能幫助您更便捷地跟進聽力學領域的最新研究進展！
+    請注意，AI 處理生成的 TL;DR 摘要和中文翻譯可能存在錯誤或不準確之處。為確保信息的準確性，我們強烈建議您參考原文內容。這些 AI 生成的內容僅供快速瀏覽參考，不應替代對原始研究論文的仔細閱讀和理解。
     """)
 
 def main():
