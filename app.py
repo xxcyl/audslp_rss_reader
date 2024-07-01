@@ -125,10 +125,14 @@ def main():
     tab1, tab2 = st.tabs(["🏠 主頁", "ℹ️ 系統介紹"])
     
     with tab1:
+        st.title("📚 聽語期刊速報")
+        
+        # 搜索框移到主畫面最上方
+        search_term = st.text_input("🔍 搜索文章 (標題或摘要)", "")
+
+        # 側邊欄：篩選器
         with st.sidebar:
-            st.title("📚 聽語期刊速報")
-            
-            search_term = st.text_input("🔍 搜索文章 (標題或摘要)", "")
+            st.title("期刊選擇")
             
             selected_feeds = []
             
@@ -145,6 +149,7 @@ def main():
             if uncategorized_journals:
                 st.warning(f"警告：以下期刊未被分類：{', '.join(uncategorized_journals)}")
 
+        # 主內容區
         if search_term != st.session_state.previous_search or selected_feeds != st.session_state.previous_feeds:
             st.session_state.current_page = 1
             st.session_state.previous_search = search_term
@@ -156,9 +161,8 @@ def main():
             total_feeds = len(filtered_data)
             total_articles = sum(len(feed_data['entries']) for feed_data in filtered_data.values())
             
-            with st.sidebar:
-                st.write(f"📊 顯示 {total_feeds} 個期刊中的 {total_articles} 篇文章")
-                st.write("---")
+            st.write(f"📊 顯示 {total_feeds} 個期刊中的 {total_articles} 篇文章")
+            st.write("---")
             
             display_entries(filtered_data, journal_urls)
         else:
