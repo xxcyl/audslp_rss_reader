@@ -162,9 +162,7 @@ def main():
             total_feeds = len(filtered_data)
             total_articles = sum(len(feed_data['entries']) for feed_data in filtered_data.values())
             
-            st.write(f"📊 顯示 {total_feeds} 個期刊中的 {total_articles} 篇文章")
-            st.write("---")
-            
+            st.write(f"📊 顯示 {total_feeds} 個期刊中的 {total_articles} 篇文章")              
             display_entries(filtered_data, journal_urls)
         else:
             st.write("沒有找到符合條件的文章。")
