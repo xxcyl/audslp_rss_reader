@@ -130,7 +130,7 @@ def main():
             
             # 預定義期刊類別
             categories = {
-                "聽力學": ["Ear and Hearing", "Hearing Research", "Trends in Hearing", "International Journal of Audiology", "Journal of Audiology and Otology", "American Journal of Audiology", "Seminars in Hearing", "Audiology and Neurotology"],
+                "聽力學": ["Ear and Hearing", "Hearing Research", "Trends in Hearing", "International Journal of Audiology", "Journal of Audiology and Otology", "American Journal of Audiology", "Seminars in Hearing", "Audiology and Neurotology", "Scientific Reports w/ hearing keyword"],
                 "語言治療": ["Dysphagia", "American Journal of Speech-Language Pathology"],
                 "橫跨兩類": ["Journal of Speech, Language, and Hearing Research", "Language, Speech, and Hearing Services in Schools"]
             }
