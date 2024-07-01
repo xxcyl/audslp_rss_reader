@@ -1,0 +1,62 @@
+{
+  "categories": {
+    "聽力學": [
+      {
+        "name": "Ear and Hearing",
+        "url": "https://journals.lww.com/ear-hearing/pages/default.aspx"
+      },
+      {
+        "name": "Hearing Research",
+        "url": "https://www.sciencedirect.com/journal/hearing-research"
+      },
+      {
+        "name": "Trends in Hearing",
+        "url": "https://journals.sagepub.com/home/tia"
+      },
+      {
+        "name": "International Journal of Audiology",
+        "url": "https://www.tandfonline.com/journals/iija20"
+      },
+      {
+        "name": "Journal of Audiology and Otology",
+        "url": "https://www.ejao.org/"
+      },
+      {
+        "name": "American Journal of Audiology",
+        "url": "https://pubs.asha.org/journal/aja"
+      },
+      {
+        "name": "Seminars in Hearing",
+        "url": "https://www.thieme-connect.com/products/ejournals/journal/10.1055/s-00000067"
+      },
+      {
+        "name": "Audiology and Neurotology",
+        "url": "https://karger.com/aud"
+      },
+      {
+        "name": "Scientific Reports w/ hearing keyword",
+        "url": "https://www.nature.com/srep/"
+      }
+    ],
+    "語言治療": [
+      {
+        "name": "Dysphagia",
+        "url": "https://www.springer.com/journal/455"
+      },
+      {
+        "name": "American Journal of Speech-Language Pathology",
+        "url": "https://pubs.asha.org/journal/ajslp"
+      }
+    ],
+    "橫跨兩類": [
+      {
+        "name": "Journal of Speech, Language, and Hearing Research",
+        "url": "https://pubs.asha.org/journal/jslhr"
+      },
+      {
+        "name": "Language, Speech, and Hearing Services in Schools",
+        "url": "https://pubs.asha.org/journal/lshss"
+      }
+    ]
+  }
+}
