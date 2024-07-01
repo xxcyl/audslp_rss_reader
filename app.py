@@ -122,17 +122,18 @@ def main():
     # 創建期刊名稱到 URL 的映射
     journal_urls = {j['name']: j['url'] for c in journal_config['categories'].values() for j in c}
 
+    # 將主標題移到 tab 上方
+    st.title("📚 聽語期刊速報")
+
     tab1, tab2 = st.tabs(["🏠 主頁", "ℹ️ 系統介紹"])
     
     with tab1:
-        st.title("📚 聽語期刊速報")
-        
         # 搜索框移到主畫面最上方
         search_term = st.text_input("🔍 搜索文章 (標題或摘要)", "")
 
         # 側邊欄：篩選器
         with st.sidebar:
-            st.title("期刊選擇")
+            st.subheader("期刊選擇")
             
             selected_feeds = []
             
