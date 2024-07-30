@@ -3,6 +3,9 @@ import json
 import datetime
 import requests
 import math
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 def load_json_data_from_github(repo, file_path):
     """從 GitHub 加載 JSON 數據"""
@@ -41,10 +44,6 @@ def search_entries(data, search_term, selected_feeds):
     
     return result
     
-import logging
-
-logging.basicConfig(level=logging.INFO)
-
 def display_entries(data, journal_urls, items_per_page=10):
     """顯示所有選中期刊的條目，帶分頁功能"""
     try:
@@ -72,9 +71,10 @@ def display_entries(data, journal_urls, items_per_page=10):
                 for i, (entry, feed_name) in enumerate(all_entries[start_idx:end_idx], start=1):
                     title = entry.get('title', 'No Title')
                     title_translated = entry.get('title_translated', 'No Translated Title')
+                    unique_title = f"**{title}**\n*{title_translated}*"
                     key = f"expander_{st.session_state.current_page}_{i}"
                     logging.info(f"Creating expander with key: {key}")
-                    with st.expander(f"📍 **{title}**\n*{title_translated}*", key=key):
+                    with st.expander(label=unique_title, expanded=False, icon="📍", key=key):
                         st.write(f"發布日期: {entry.get('published', 'Unknown date')}")
                         st.markdown(entry.get('tldr', 'No summary available'))
                         journal_url = journal_urls.get(feed_name, "#")
