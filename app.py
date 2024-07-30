@@ -45,9 +45,9 @@ def display_entries(data, journal_urls, items_per_page=10):
     """顯示所有選中期刊的條目，帶分頁功能"""
     all_entries = []
     for feed_name, feed_data in data.items():
-        all_entries.extend([(entry, feed_name) for entry in feed_data['entries']])
+        all_entries.extend([(entry, feed_name) for entry in feed_data.get('entries', [])])
     
-    all_entries.sort(key=lambda x: x[0]['published'], reverse=True)
+    all_entries.sort(key=lambda x: x[0].get('published', ''), reverse=True)
     
     total_entries = len(all_entries)
     total_pages = max(1, math.ceil(total_entries / items_per_page))
@@ -65,14 +65,16 @@ def display_entries(data, journal_urls, items_per_page=10):
     if total_entries > 0:
         with entries_container:
             for i, (entry, feed_name) in enumerate(all_entries[start_idx:end_idx], start=1):
-                with st.expander(f"📍 **{entry['title']}**\n*{entry['title_translated']}*", key=f"expander_{st.session_state.current_page}_{i}"):
-                    st.write(f"發布日期: {entry['published']}")
-                    st.markdown(entry['tldr'])
+                title = entry.get('title', 'No Title')
+                title_translated = entry.get('title_translated', 'No Translated Title')
+                with st.expander(f"📍 **{title}**\n*{title_translated}*", key=f"expander_{st.session_state.current_page}_{i}"):
+                    st.write(f"發布日期: {entry.get('published', 'Unknown date')}")
+                    st.markdown(entry.get('tldr', 'No summary available'))
                     journal_url = journal_urls.get(feed_name, "#")
                     if journal_url != "#":
-                        st.markdown(f"🔗 [PubMed]({entry['link']}) 📚 [{feed_name}]({journal_url})")
+                        st.markdown(f"🔗 [PubMed]({entry.get('link', '#')}) 📚 [{feed_name}]({journal_url})")
                     else:
-                        st.markdown(f"🔗 [PubMed]({entry['link']}) 📚 {feed_name}")
+                        st.markdown(f"🔗 [PubMed]({entry.get('link', '#')}) 📚 {feed_name}")
 
         st.write("---")
         col1, col2, col3 = st.columns([1, 2, 1])
