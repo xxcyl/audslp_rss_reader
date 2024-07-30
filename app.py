@@ -52,21 +52,27 @@ def display_entries(data, journal_urls, items_per_page=10):
     total_entries = len(all_entries)
     total_pages = max(1, math.ceil(total_entries / items_per_page))
 
+    if 'current_page' not in st.session_state:
+        st.session_state.current_page = 1
+
     st.session_state.current_page = min(st.session_state.current_page, total_pages)
 
     start_idx = (st.session_state.current_page - 1) * items_per_page
     end_idx = min(start_idx + items_per_page, total_entries)
     
+    entries_container = st.empty()
+
     if total_entries > 0:
-        for entry, feed_name in all_entries[start_idx:end_idx]:
-            with st.expander(f"📍 **{entry['title']}**\n*{entry['title_translated']}*"):
-                st.write(f"發布日期: {entry['published']}")
-                st.markdown(entry['tldr'])
-                journal_url = journal_urls.get(feed_name, "#")
-                if journal_url != "#":
-                    st.markdown(f"🔗 [PubMed]({entry['link']}) 📚 [{feed_name}]({journal_url})")
-                else:
-                    st.markdown(f"🔗 [PubMed]({entry['link']}) 📚 {feed_name}")
+        with entries_container.container():
+            for entry, feed_name in all_entries[start_idx:end_idx]:
+                with st.expander(f"📍 **{entry['title']}**\n*{entry['title_translated']}*"):
+                    st.write(f"發布日期: {entry['published']}")
+                    st.markdown(entry['tldr'])
+                    journal_url = journal_urls.get(feed_name, "#")
+                    if journal_url != "#":
+                        st.markdown(f"🔗 [PubMed]({entry['link']}) 📚 [{feed_name}]({journal_url})")
+                    else:
+                        st.markdown(f"🔗 [PubMed]({entry['link']}) 📚 {feed_name}")
 
         st.write("---")
         col1, col2, col3 = st.columns([1, 2, 1])
@@ -75,7 +81,8 @@ def display_entries(data, journal_urls, items_per_page=10):
         
         if page != st.session_state.current_page:
             st.session_state.current_page = page
-            st.experimental_rerun()
+            entries_container.empty()
+            display_entries(data, journal_urls, items_per_page)
     else:
         st.write("沒有找到符合條件的文章。")
 
