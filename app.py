@@ -24,23 +24,23 @@ def search_entries(data, search_term, selected_feeds):
             continue
         
         filtered_entries = [
-            entry for entry in feed_data['entries']
+            entry for entry in feed_data.get('entries', [])
             if not search_term or
-            search_term in entry['title'].lower() or
-            search_term in entry['title_translated'].lower() or
-            search_term in entry['tldr'].lower()
+            search_term in entry.get('title', '').lower() or
+            search_term in entry.get('title_translated', '').lower() or
+            search_term in entry.get('tldr', '').lower()
         ]
         
         if filtered_entries:
             result[feed_name] = {
-                'feed_title': feed_data['feed_title'],
-                'feed_link': feed_data['feed_link'],
-                'feed_updated': feed_data['feed_updated'],
+                'feed_title': feed_data.get('feed_title', 'Unknown Feed'),
+                'feed_link': feed_data.get('feed_link', '#'),
+                'feed_updated': feed_data.get('feed_updated', 'Unknown date'),
                 'entries': filtered_entries
             }
     
     return result
-
+    
 def display_entries(data, journal_urls, items_per_page=10):
     """顯示所有選中期刊的條目，帶分頁功能"""
     all_entries = []
