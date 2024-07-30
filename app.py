@@ -47,6 +47,7 @@ def search_entries(data, search_term, selected_feeds):
 def display_entries(data, journal_urls, items_per_page=10):
     """顯示所有選中期刊的條目，帶分頁功能"""
     try:
+        logging.info(f"Streamlit version: {st.__version__}")
         all_entries = []
         for feed_name, feed_data in data.items():
             all_entries.extend([(entry, feed_name) for entry in feed_data.get('entries', [])])
@@ -74,36 +75,49 @@ def display_entries(data, journal_urls, items_per_page=10):
                     unique_title = f"**{title}**\n*{title_translated}*"
                     key = f"expander_{st.session_state.current_page}_{i}"
                     logging.info(f"Creating expander with key: {key}")
-                    with st.expander(label=unique_title, expanded=False, icon="📍", key=key):
-                        st.write(f"發布日期: {entry.get('published', 'Unknown date')}")
-                        st.markdown(entry.get('tldr', 'No summary available'))
-                        journal_url = journal_urls.get(feed_name, "#")
-                        if journal_url != "#":
-                            st.markdown(f"🔗 [PubMed]({entry.get('link', '#')}) 📚 [{feed_name}]({journal_url})")
-                        else:
-                            st.markdown(f"🔗 [PubMed]({entry.get('link', '#')}) 📚 {feed_name}")
+                    try:
+                        # 嘗試使用 key 參數
+                        with st.expander(label=unique_title, expanded=False, icon="📍", key=key):
+                            display_entry_content(entry, feed_name, journal_urls)
+                    except TypeError:
+                        # 如果失敗，回退到不使用 key 的版本
+                        logging.warning("Expander does not support 'key' parameter. Falling back to version without key.")
+                        with st.expander(label=unique_title, expanded=False, icon="📍"):
+                            display_entry_content(entry, feed_name, journal_urls)
 
             st.write("---")
-            col1, col2, col3 = st.columns([1, 2, 1])
-            with col2:
-                def change_page():
-                    st.session_state.current_page = st.session_state.new_page
-                    st.rerun()
-
-                st.number_input(
-                    f"頁碼 (共 {total_pages} 頁)",
-                    min_value=1,
-                    max_value=total_pages,
-                    value=st.session_state.current_page,
-                    step=1,
-                    key="new_page",
-                    on_change=change_page
-                )
+            display_pagination(total_pages)
         else:
             st.write("沒有找到符合條件的文章。")
     except Exception as e:
         logging.error(f"Error in display_entries: {str(e)}")
         st.error("An error occurred while displaying entries. Please try again.")
+
+def display_entry_content(entry, feed_name, journal_urls):
+    st.write(f"發布日期: {entry.get('published', 'Unknown date')}")
+    st.markdown(entry.get('tldr', 'No summary available'))
+    journal_url = journal_urls.get(feed_name, "#")
+    if journal_url != "#":
+        st.markdown(f"🔗 [PubMed]({entry.get('link', '#')}) 📚 [{feed_name}]({journal_url})")
+    else:
+        st.markdown(f"🔗 [PubMed]({entry.get('link', '#')}) 📚 {feed_name}")
+
+def display_pagination(total_pages):
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        def change_page():
+            st.session_state.current_page = st.session_state.new_page
+            st.rerun()
+
+        st.number_input(
+            f"頁碼 (共 {total_pages} 頁)",
+            min_value=1,
+            max_value=total_pages,
+            value=st.session_state.current_page,
+            step=1,
+            key="new_page",
+            on_change=change_page
+        )
 
 def show_introduction():
     """顯示最終更新後的系統介紹，包含警語"""
